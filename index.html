@@ -1,36 +1,119 @@
-  <html>
+<html>
     <head>
-        <title>JPMorgan-Chase-Best-Hack-for-Social-Good-</title>
+        <title>Debt Visualizer</title>
         <link rel="stylesheet" href="style.css">
-        <script src='render.js'></script>
     </head>
     <body>
-        <div id='submission'>
-            <h1 id='submissionTitle'>JPMorgan-Chase-Best-Hack-for-Social-Good-</h1> <br>
+        <div id="submission">
+            <h1 id="submissionTitle">Debt Visualizer</h1> <br>
             <p>
-                <form action="_blank" method="get">
-                    Expected Year Of Graduation: <input id='userGradYr' type="number"> <br>
-                    College: <textarea rows=1 id='userCollege'></textarea> <br>
-                    Degree: <select id='userDegree' name="Select" id="degree">
-                        <option value="Communication">Communication</option>
-                        <option value="Buisiness">Buisiness</option>
-                        <option value="STEM">STEM</option>
-                        <option value="Education">Education</option>
-                        <option value="MD">MD</option>
-                        <option value="MBA">MBA</option>
-                        <option value="Liberal Arts">Liberal Arts</option>
-                        <option value="Law">Law</option> 
+                <form id="new_form" onsubmit="grabUserInfo()">                    
+                    Expected Year Of Graduation: <input id="userGradYr" type="number" onkeydown="grabUserInfo()"> <br>
+                    College: <select name="College" id="selected_tuition" onclick="grabUserInfo()" onclick="updateChart()">
+                        <option value="0">In-State Public University</option>
+                        <option value="1">Out-of-State Public University</option>
+                        <option value="2">Ivy League University</option>
                     </select> <br>
-                    Debt Amount: $ <input id='userDebt'  type="number"> <br> 
-                    Interest Rate: <input id='userIntrstRate'  type="number"> % <br> 
-                    <input name='Submit' type="submit" onclick="grabUserInfo()"> <br>
+                    Degree: <select name="Degree" id="selected_degree" onclick="grabUserInfo()">
+                        <option value="Business">Business</option>
+                        <option value="Science">Science</option>
+                        <option value="Nursing">Nursing</option>
+                        <option value="Social Work">Social Work</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Education">Education</option>
+                        <option value="Liberal Arts">Liberal Arts</option>
+                    </select> <br>
+                    Debt Amount: $ <input type="number" id="userDebt" onkeydown="grabUserInfo()"> <br> 
+                    Interest Rate: <input type="number" id="userIntrstRate" onkeydown="grabUserInfo()"> % <br>
                 </form>
             </p>
         </div>
-        <div id='charts'>
-            <div id='payoffgraph'></div>
-            <div id='middletext'></div>
-            <div id='incomeperyearchart'></div>
+        <script>
+            var x_start = 2022; //expected graduation year, origin
+            var x_end = (x_start) + 10; //limit of the x-axis
+            var y = [0, 150000]; //In thousands. Later on, make it switch just for the doctor. [1] for the lowest cost [2] for the highest cost
+
+            //get more accurate salaries for better output
+            const major_salary_dictionary = {
+                "Business": 54446,
+                "Science": 52200,
+                "Nursing": 77460,
+                "Social Work": 61230,
+                "Engineering": 91010,
+                "Education ": 61730,
+                "Liberal Arts": 40000,
+            } //Major Inforation
+
+
+            const average_university_tuition = [(10440*4), (26820*4), (56631*4)]; //[1] is in state public university, [2] is out state public uni, [3] is ivy league
+
+            const average_interest_rate = 1.058; //From google
+
+            const average_debt_payment_rate = 0.055; //According to https://www.jpmorganchase.com/institute/research/household-debt/report-student-loan-payments
+
+            const average_salary_growth_rate = 1.036; //(We may not need this because we are already calculating the average salary)
+
+
+            var debt = Array.apply(null, Array(10)); //debt graph, empty array
+            var payment = Array.apply(null, Array(10)); //payment graph, empty array
+
+            var selected_tuition;
+            var selected_degree;
+
+            function grabUserInfo() {
+
+                selected_tuition = average_university_tuition[parseInt(document.getElementById("selected_tuition").value)]; //selected from HTML
+                selected_degree = major_salary_dictionary[document.getElementById("selected_degree").value];
+
+                for (i = 0; i < 10; i++) {
+                    debt[i] = (selected_tuition * Math.pow(average_interest_rate, (i + 1)));
+                    console.log(debt[i]);
+                } //debt graph. range is 10 years. "i" is just an iterator
+                
+                console.log("");
+                
+                for (i=0; i < 10; i++){
+                    payment[i] = (selected_degree * Math.pow(average_salary_growth_rate, (i+1)));
+                    console.log(payment[i]);
+                } //payment graph. range is 10 years.
+            }
+            grabUserInfo();
+        </script>
+        <canvas id="myChart"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script>
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'line',
+
+                // The data for our dataset
+                data: {
+                    labels: [x_start, 
+                    (x_start + 1), 
+                    (x_start + 2), 
+                    (x_start + 3),
+                    (x_start + 4),
+                    (x_start + 5),
+                    (x_start + 6),
+                    (x_start + 7),
+                    (x_start + 8),
+                    (x_start + 9),
+                    (x_start + 10)],
+                    datasets: [{
+                        label: 'debt',
+                        backgroundColor: 'rgb(255,0,0)',
+                        borderColor: 'rgb(255,0,0)',
+                        data: debt
+                    }]
+                },
+                options: {}
+            })
+            function updateChart() {
+                chart.data.datasets[0].data = debt;
+                chart.update();
+            }
+        </script>
         </div>
     </body>
 </html>
