@@ -1,4 +1,4 @@
-# JPMorgan-Chase-Best-Hack-for-Social-Good-
+# Debt Visualizer
 This was an entry project for the 2020 CodeRED Voyage Hackathon
 
 ### Inspiration
